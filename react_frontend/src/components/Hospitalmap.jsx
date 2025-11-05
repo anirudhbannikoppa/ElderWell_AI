@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"; // hooks only; default React import
 import { MapContainer, TileLayer, Marker, Popup, Tooltip } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import Loader from "../UI/loader";
+import Loader from "../UI/Loader";
 
 // Fix for missing default Leaflet marker icons in some bundlers/platforms
 delete L.Icon.Default.prototype._getIconUrl;
