@@ -1,0 +1,185 @@
+# ===================================================
+# 🧠 PYTHON / FLASK / BACKEND
+# ===================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv.bak/
+env/
+.env
+.env.*
+.envrc
+
+# Logs
+*.log
+*.out
+*.err
+
+# Flask specific
+instance/
+.webassets-cache/
+flask_session/
+*.db
+*.sqlite
+*.sqlite3
+
+# RAG & AI models
+
+rag_system/__pycache__/
+*.pkl
+*.pt
+*.bin
+*.model
+*.jsonl
+*.csv
+*.xlsx
+
+# Caches and temporary files
+__pycache__/
+.cache/
+tmp/
+*.pid
+*.bak
+*.tmp
+*.swp
+*.swo
+
+# Tools / IDE
+.idea/
+.vscode/
+.mypy_cache/
+.pyre/
+.pytype/
+.dmypy.json
+.pybuilder/
+.pytest_cache/
+.ruff_cache/
+.ropeproject/
+.spyderproject
+.spyproject
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+profile_default/
+ipython_config.py
+
+# Build / Reports
+docs/_build/
+target/
+site/
+reports/
+
+# ===================================================
+# 🎨 REACT / FRONTEND
+# ===================================================
+
+# dependencies
+node_modules/
+bower_components/
+
+# production
+build/
+dist/
+
+# misc
+.DS_Store
+Thumbs.db
+.vite/
+.eslintcache
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor directories and files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# React specific
+*.cache/
+*.lock
+*.tsbuildinfo
+*.tgz
+
+# ===================================================
+# 🐳 DOCKER / DEPLOYMENT
+# ===================================================
+
+docker-compose.override.yml
+*.pid
+*.seed
+*.bak
+*.tmp
+*.swp
+*.swo
+Dockerfile*
+__MACOSX/
+
+# ===================================================
+# 🚀 OTHER COMMON IGNORE
+# ===================================================
+
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+__MACOSX/
+*.bak
+*.old
+*.orig
+*.rej
+*.log
+coverage/
+htmlcov/
+site/
+
+# Ignore sensitive data
+secrets.json
+token.json
+auth_config.json
+firebase.json
