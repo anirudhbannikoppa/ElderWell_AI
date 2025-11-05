@@ -1,0 +1,66 @@
+/* Hero section styles: layout, text, buttons and decorative boxes */
+.hero__wrapper {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 50px;
+}
+
+.hero__content .section__title {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+.highlights {
+  color: var(--primary-color);
+}
+
+.hero__content p {
+  font-size: 1.1rem;
+  color: var(--heading-color);
+  margin-bottom: 30px;
+  line-height: 30px;
+}
+
+.hero__btns {
+  display: flex;
+  align-items: center;
+  column-gap: 3rem;
+}
+
+/* Decorative circular boxes used behind the hero image */
+.box-01 {
+  width: 400px;
+  height: 400px;
+  border-radius: 100%;
+  border: 25px solid #d3cef2;
+}
+.box-02 {
+  width: 350px;
+  height: 350px;
+  border-radius: 100%;
+  border: 25px solid #b5a9f3;
+}
+.box-03 {
+  width: 300px;
+  height: 300px;
+  border-radius: 100%;
+  background: rgba(141, 141, 235, 1);
+}
+
+.hero__img-wrapper {
+  position: relative;
+  z-index: 1;
+}
+.heroposter {
+  margin-top: 12px;
+}
+
+.box__img {
+  position: absolute;
+  top: 1%;
+  left: -13%;
+  z-index: 10;
+  padding-left: 35px;
+}
+.box__img img {
+  width: 123%;
+}

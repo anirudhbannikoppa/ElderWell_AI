@@ -1,0 +1,28 @@
+# =============================================================================
+# Medical Chatbot Backend Dependencies
+# =============================================================================
+
+# Core Flask Backend - Web API Framework
+# ------------------------------------
+flask==3.1.1                    # Web framework for REST API
+flask-cors==5.0.0               # Cross-Origin Resource Sharing for React frontend
+python-dotenv==1.1.0            # Environment variable management
+
+# LangChain + OpenAI + Pinecone - AI/ML Stack
+# -----------------------------------------
+langchain==0.3.26               # Main LangChain framework
+langchain-pinecone==0.2.8       # Vector store for document embeddings
+langchain-openai==0.3.24        # OpenAI integration for chat completions
+langchain-community==0.3.26     # Additional LangChain utilities
+
+# Natural Language Processing
+# -------------------------
+sentence-transformers==4.1.0    # Hugging Face embeddings for document indexing
+
+# Document Processing
+# -----------------
+pypdf==5.6.1                    # PDF document parsing and text extraction
+
+# Development Tools
+# ---------------
+-e .                            # Install package in editable mode for development
