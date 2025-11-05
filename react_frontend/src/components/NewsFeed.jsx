@@ -1,25 +1,30 @@
-import { useEffect, useState } from "react"; // no default React import required
+import { useEffect, useState } from "react";
 import Loader from "../UI/Loader";
 
-// NewsFeed component: fetches health-related news (NewsAPI) and displays cards
+// NewsFeed component: fetches health-related news (NewsData.io) and displays cards
 const NewsFeed = () => {
   const [articles, setArticles] = useState([]); // fetched articles with images
   const [loading, setLoading] = useState(true); // loading indicator
   const [error, setError] = useState(null); // fetch / network errors
 
-  // Fetch news from NewsAPI using Vite environment variable for the API key
+  // Fetch news from NewsData.io using Vite environment variable for the API key
   const fetchNews = async () => {
     try {
+      setLoading(true);
       const res = await fetch(
-        `https://newsapi.org/v2/everything?q=adult+health+OR+aging+health+OR+elderly+care+OR+senior+nutrition+OR+geriatric+medicine+OR+aging+population+OR+age-related+diseases+OR+dementia+OR+senior+wellness+OR+healthcare+for+seniors&language=en&pageSize=100&sortBy=publishedAt&apiKey=${
-          import.meta.env.VITE_API_NEWS_CLIENT
-        }`
+        `https://newsdata.io/api/1/news?apikey=${
+          import.meta.env.VITE_NEWS_DATA_API
+        }&q=health,fitness,medical,aging,elderly&language=en`
       );
+
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
       const data = await res.json();
-      // Keep only articles that include an image
-      const filtered = data.articles.filter((article) => article.urlToImage);
-      setArticles(filtered);
+
+      // NewsData.io returns 'results' instead of 'articles'
+      const filtered = (data.results || []).filter(
+        (article) => article.image_url
+      );
+      setArticles(filtered.slice(0, 9)); // limit to 9 for 3x3 grid
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -28,6 +33,7 @@ const NewsFeed = () => {
     }
   };
 
+  // Load news on mount
   useEffect(() => {
     fetchNews();
   }, []);
@@ -40,22 +46,23 @@ const NewsFeed = () => {
           Adult & Aging Health News
         </h1>
       </header>
-      {loading && !error ? (
+
+      {loading ? (
         <div className="flex items-center justify-center h-screen">
           <Loader />
         </div>
       ) : error ? (
-        <p className="text-red-500">Error: {error}</p>
+        <p className="text-red-500 text-center mt-4">Error: {error}</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {articles.length > 0 ? (
             articles.map((article, idx) => (
               <div
                 key={idx}
-                className="bg-blue-50 rounded-xl shadow-md overflow-hidden"
+                className="bg-blue-50 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
               >
                 <img
-                  src={article.urlToImage}
+                  src={article.image_url}
                   alt={article.title}
                   className="w-full h-48 object-cover"
                 />
@@ -69,10 +76,10 @@ const NewsFeed = () => {
                       : "No summary available."}
                   </p>
                   <a
-                    href={article.url}
+                    href={article.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-500 text-sm"
+                    className="text-blue-500 text-sm font-medium hover:underline"
                   >
                     Read more →
                   </a>
@@ -80,7 +87,9 @@ const NewsFeed = () => {
               </div>
             ))
           ) : (
-            <p>No adult health news with images available right now.</p>
+            <p className="text-gray-500 text-center">
+              No adult health news with images available right now.
+            </p>
           )}
         </div>
       )}
