@@ -1,97 +1,140 @@
 import { useEffect, useState } from "react";
 import Loader from "../UI/Loader";
 
-// NewsFeed component: fetches health-related news (NewsData.io) and displays cards
 const NewsFeed = () => {
-  const [articles, setArticles] = useState([]); // fetched articles with images
-  const [loading, setLoading] = useState(true); // loading indicator
-  const [error, setError] = useState(null); // fetch / network errors
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
-  // Fetch news from NewsData.io using Vite environment variable for the API key
-  const fetchNews = async () => {
+  const LIMIT = 9; // show 12 news per page
+
+  // Fetch health news from Mediastack
+  const fetchNews = async (newOffset = 0) => {
     try {
       setLoading(true);
+      setError(null);
+
       const res = await fetch(
-        `https://newsdata.io/api/1/news?apikey=${
-          import.meta.env.VITE_NEWS_DATA_API
-        }&q=health,fitness,medical,aging,elderly&language=en`
+        `http://api.mediastack.com/v1/news?access_key=${
+          import.meta.env.VITE_MEDIASTACK_API
+        }&categories=health&keywords=health&languages=en&limit=30&offset=${newOffset}`
       );
 
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+
       const data = await res.json();
 
-      // NewsData.io returns 'results' instead of 'articles'
-      const filtered = (data.results || []).filter(
-        (article) => article.image_url
+      if (!data.data || data.data.length === 0) {
+        setHasMore(false);
+        setLoading(false);
+        return;
+      }
+
+      // Filter only articles with images
+      const filtered = data.data.filter(
+        (article) => article.image && article.image.trim() !== ""
       );
-      setArticles(filtered.slice(0, 9)); // limit to 9 for 3x3 grid
+
+      // Limit to 12 visible
+      const visibleArticles = filtered.slice(0, LIMIT);
+
+      // Append new results
+      setArticles((prev) => [...prev, ...visibleArticles]);
       setLoading(false);
     } catch (err) {
       setError(err.message);
-      setArticles([]);
       setLoading(false);
     }
   };
 
-  // Load news on mount
   useEffect(() => {
-    fetchNews();
+    fetchNews(0);
   }, []);
 
-  // Render
+  const handleLoadMore = () => {
+    const newOffset = offset + LIMIT;
+    setOffset(newOffset);
+    fetchNews(newOffset);
+  };
+
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <header className="text-center py-1">
-        <h1 className="text-2xl font-bold text-customPurple hover:text-blue-600 transition-colors">
-          Adult & Aging Health News
+      {/* Header */}
+      <header className="text-center mb-6">
+        <h1 className="text-3xl font-bold text-customPurple hover:text-blue-600 transition-colors">
+          Latest Health News
         </h1>
       </header>
 
-      {loading ? (
+      {loading && articles.length === 0 ? (
         <div className="flex items-center justify-center h-screen">
           <Loader />
         </div>
       ) : error ? (
         <p className="text-red-500 text-center mt-4">Error: {error}</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {articles.length > 0 ? (
-            articles.map((article, idx) => (
-              <div
-                key={idx}
-                className="bg-blue-50 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
-              >
-                <img
-                  src={article.image_url}
-                  alt={article.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-2">
-                    {article.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-3">
-                    {article.description
-                      ? article.description.slice(0, 100) + "..."
-                      : "No summary available."}
-                  </p>
-                  <a
-                    href={article.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 text-sm font-medium hover:underline"
-                  >
-                    Read more →
-                  </a>
+        <>
+          {/* News Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {articles.length > 0 ? (
+              articles.map((article, idx) => (
+                <div
+                  key={idx}
+                  className="bg-blue-50 rounded-xl shadow-md overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
+                >
+                  <img
+                    src={article.image}
+                    alt={article.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg mb-2 text-gray-800 line-clamp-2">
+                      {article.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                      {article.description
+                        ? article.description.slice(0, 100) + "..."
+                        : "No summary available."}
+                    </p>
+                    <a
+                      href={article.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 text-sm font-medium hover:underline"
+                    >
+                      Read more →
+                    </a>
+                  </div>
                 </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500 text-center">
-              No adult health news with images available right now.
+              ))
+            ) : (
+              <p className="text-gray-500 text-center col-span-3">
+                No health news with images available right now.
+              </p>
+            )}
+          </div>
+
+          {/* Load More Button */}
+          {hasMore && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={handleLoadMore}
+                disabled={loading}
+                className="bg-customPurple text-white px-6 py-2 rounded-xl font-semibold shadow-md hover:bg-blue-600 transition-colors"
+              >
+                {loading ? "Loading..." : "Load More"}
+              </button>
+            </div>
+          )}
+
+          {!hasMore && (
+            <p className="text-center text-gray-500 mt-6">
+              No more health news available.
             </p>
           )}
-        </div>
+        </>
       )}
     </div>
   );
