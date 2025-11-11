@@ -26,8 +26,8 @@ app = Flask(__name__)
 CORS(app, resources={
     r"/api/*": {
         "origins": [
-            "https://elderwell.vercel.app",  # or your frontend live domain
-            "https://www.elderwell.in"       # if you have a custom domain
+            "https://elderwell.netlify.app",  # or your frontend live domain
+            "https://www.elderwell.online"       # if you have a custom domain
         ],
         "methods": ["POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
