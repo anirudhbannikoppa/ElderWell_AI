@@ -24,10 +24,14 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 py-1 flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center space-x-2">
-          <div className="mb-6 md:mb-0">
+          <div className="flex items-center space-x-3">
             <a href="/#" className="flex items-center">
-              <img src={logo} className="h-12 me-2" alt="FlowBite Logo" />
-              <span className="self-center text-3xl font-semibold whitespace-nowrap dark:text-white">
+              <img
+                src={logo}
+                className="h-12 w-auto object-contain"
+                alt="ElderWell Logo"
+              />
+              <span className="text-3xl md:text-4xl font-semibold text-gray-900 ml-4 mt-2 ">
                 ElderWell
               </span>
             </a>
