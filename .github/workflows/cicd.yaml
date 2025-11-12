@@ -21,6 +21,7 @@ on:
     branches: [main]
     paths:
       - "python_rag_backend/**"
+  workflow_dispatch:
 
 # ============================================================
 # 🧱 JOB 1: Continuous Integration (CI)
