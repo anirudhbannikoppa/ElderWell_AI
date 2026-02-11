@@ -1,9 +1,17 @@
 # 🌿 ElderWell — AI-Powered Health & Wellness Assistant
 
-**ElderWell** is a full-stack health and wellness web application designed to empower elderly users to stay healthy, organized, and informed.  
+**ElderWell** is a full-stack health and wellness web application designed to empower elderly users to stay healthy, organized, and informed.It uses a **Retrieval-Augmented Generation (RAG)** architecture to deliver accurate, context-aware, and personalized health responses.  
 It integrates an **AI Medical Assistant**, secure **Health Record Management**, **Nearby Hospital Mapping**, and **Health News Feed** — all in one modern, accessible interface.
 
 ---
+
+# 🧠 RAG Architecture – Elder Well
+
+Elder Well uses a Retrieval-Augmented Generation (RAG) architecture to deliver accurate and personalized AI health assistance for elderly users. When a user submits a query, the system authenticates them securely using Auth0 and converts the query into vector embeddings. These embeddings are used to retrieve relevant medical knowledge from a vector database, along with the user’s personal health data such as age, medical conditions, medications, and recent lab reports.
+
+The retrieved medical context and user-specific health profile are combined into a structured prompt and sent to a Large Language Model (LLM). Because the response is grounded in both trusted medical knowledge and personalized data, the system generates context-aware, safer, and more relevant answers while reducing hallucination.
+
+This RAG-based approach allows real-time knowledge updates, secure user-level personalization, and scalable architecture without requiring model fine-tuning, making Elder Well a reliable AI health assistant for elderly users.
 
 ## ⚙️ Tech Stack
 
@@ -62,6 +70,30 @@ ElderWell/
 ├── .gitignore            # Git ignore rules
 └── README.md             # Project documentation
 ```
+
+🏗️ System Architecture
+
+## 🔄 High-Level Flow
+
+User Query  
+↓  
+Authentication (Auth0)  
+↓  
+Query Processing  
+↓  
+Vector Embedding  
+↓  
+Semantic Retrieval (Vector DB)  
+↓  
+User Health Context Injection  
+↓  
+Prompt Construction  
+↓  
+LLM Response Generation  
+↓  
+Personalized AI Output
+
+---
 
 ---
 
@@ -182,13 +214,11 @@ Integrated **Auth0 login** ensures your data and records remain private and secu
 ## 🧠 How It Works
 
 1. **Document Processing**
-
    - Medical PDFs are split into chunks.
    - Text embeddings are generated using OpenAI models.
    - Stored in Pinecone vector DB.
 
 2. **Query Answering**
-
    - User question → embedded → context retrieved.
    - Flask server runs LangChain RAG pipeline.
    - GPT model generates a concise, context-based response.

@@ -18,7 +18,9 @@ root.render(
     domain={import.meta.env.VITE_AUTH0_DOMAIN}
     clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
     authorizationParams={{
-      redirect_uri: window.location.origin
+      redirect_uri: window.location.origin,
+      audience: "elderwell-api", // 👈 MUST match Auth0 API Identifier
+      scope: "openid profile email",
     }}
   >
     <StrictMode>
@@ -28,5 +30,5 @@ root.render(
         </BrowserRouter>
       </AuthContextProvider>
     </StrictMode>
-  </Auth0Provider>
+  </Auth0Provider>,
 );

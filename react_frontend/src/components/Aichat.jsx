@@ -19,9 +19,10 @@ export default function App() {
   const [generatingAnswer, setGeneratingAnswer] = useState(false);
   const chatContainerRef = useRef(null);
 
-  const { user, isAuthenticated } = useAuth0?.() || {
+  const { user, isAuthenticated, getAccessTokenSilently } = useAuth0?.() || {
     user: null,
     isAuthenticated: false,
+    getAccessTokenSilently: null,
   };
 
   useEffect(() => {
@@ -102,10 +103,21 @@ You are Aira, a compassionate and careful health assistant for elderly users.
 
     // Try backend first
     try {
+      const token = await getAccessTokenSilently({
+        authorizationParams: {
+          audience: "elderwell-api",
+        },
+      });
+
       const response = await axios.post(
         import.meta.env.VITE_API_URL,
         { message: currentQuestion },
-        { timeout: 25000 } // 25 second timeout (adjust as needed)
+        {
+          timeout: 25000,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
 
       // Expect backend to return { reply: "..." } or similar
@@ -121,7 +133,7 @@ You are Aira, a compassionate and careful health assistant for elderly users.
       // Silent fallback: do NOT display any backend/fallback message to user
       console.warn(
         "Backend call failed — using OpenAI fallback (silent).",
-        backendErr
+        backendErr,
       );
 
       const fallbackAnswer = await callOpenAIFallback(currentQuestion);
