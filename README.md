@@ -5,6 +5,8 @@ It integrates an **AI Medical Assistant**, secure **Health Record Management**, 
 
 ---
 
+Url for web UI: https://elderwell.netlify.app/
+
 # 🧠 RAG Architecture – Elder Well
 
 Elder Well uses a Retrieval-Augmented Generation (RAG) architecture to deliver accurate and personalized AI health assistance for elderly users. When a user submits a query, the system authenticates them securely using Auth0 and converts the query into vector embeddings. These embeddings are used to retrieve relevant medical knowledge from a vector database, along with the user’s personal health data such as age, medical conditions, medications, and recent lab reports.
