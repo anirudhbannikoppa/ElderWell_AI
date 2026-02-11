@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 
-// Simple in-memory health records component
-// - Allows adding/editing/deleting records locally (no backend)
-// - Protects content behind Auth0 authentication
+const API_BASE = import.meta.env.VITE_API_URL_RECORD;
+
 const MyHealthReports = () => {
-  // Local state: saved records and the form payload
+  const { isAuthenticated, loginWithRedirect, getAccessTokenSilently } =
+    useAuth0();
+
   const [records, setRecords] = useState([]);
-  // We only need authentication state and the login helper here.
-  const { isAuthenticated, loginWithRedirect } = useAuth0();
+  const [editId, setEditId] = useState(null);
+
   const [newRecord, setNewRecord] = useState({
     doctorName: "",
     hospitalName: "",
@@ -18,46 +19,39 @@ const MyHealthReports = () => {
     prescribedMedicines: "",
     specialNotes: "",
   });
-  const [editId, setEditId] = useState(null);
 
-  // Update form fields
+  // ========================
+  // FETCH RECORDS (GET)
+  // ========================
+  const fetchHealthRecords = async () => {
+    const token = await getAccessTokenSilently({
+      authorizationParams: { audience: "elderwell-api" },
+    });
+
+    const res = await fetch(`${API_BASE}/health-records`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    setRecords(data);
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchHealthRecords();
+    }
+  }, [isAuthenticated]);
+
+  // ========================
+  // FORM HANDLING
+  // ========================
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewRecord({ ...newRecord, [name]: value });
   };
 
-  // Submit form: create or update a record
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (editId !== null) {
-      setRecords(
-        records.map((record) =>
-          record.id === editId ? { ...record, ...newRecord } : record,
-        ),
-      );
-      setEditId(null);
-    } else {
-      setRecords([...records, { id: Date.now(), ...newRecord }]);
-    }
-    resetForm();
-  };
-
-  // Delete record after confirmation
-  const handleDelete = (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this record?",
-    );
-    if (confirmDelete) setRecords(records.filter((record) => record.id !== id));
-  };
-
-  // Prepare form for editing a record
-  const handleEdit = (record) => {
-    setNewRecord({ ...record });
-    setEditId(record.id);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // Reset form to initial state
   const resetForm = () => {
     setNewRecord({
       doctorName: "",
@@ -70,7 +64,87 @@ const MyHealthReports = () => {
     });
   };
 
-  // If user is not authenticated, show login prompt
+  // ========================
+  // CREATE / UPDATE
+  // ========================
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const token = await getAccessTokenSilently({
+      authorizationParams: { audience: "elderwell-api" },
+    });
+
+    if (editId) {
+      // UPDATE
+      await fetch(`${API_BASE}/health-records/${editId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newRecord),
+      });
+      setEditId(null);
+    } else {
+      // CREATE
+      await fetch(`${API_BASE}/health-records`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newRecord),
+      });
+    }
+
+    resetForm();
+    fetchHealthRecords();
+  };
+
+  // ========================
+  // EDIT
+  // ========================
+  const handleEdit = (record) => {
+    setEditId(record.id);
+    setNewRecord({
+      doctorName: record.doctor_name,
+      hospitalName: record.hospital_name,
+      date: record.visit_date,
+      diagnosis: record.diagnosis || "",
+      doctorSuggestion: record.doctor_suggestion || "",
+      prescribedMedicines: record.prescribed_medicines || "",
+      specialNotes: record.special_notes || "",
+    });
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // ========================
+  // DELETE
+  // ========================
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this record?",
+    );
+    if (!confirmDelete) return;
+
+    const token = await getAccessTokenSilently({
+      authorizationParams: { audience: "elderwell-api" },
+    });
+
+    await fetch(`${API_BASE}/health-records/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    fetchHealthRecords();
+  };
+
+  // ========================
+  // AUTH GUARD
+  // ========================
   if (!isAuthenticated) {
     return (
       <div className="relative h-screen flex justify-center items-center bg-gray-100">
@@ -93,35 +167,35 @@ const MyHealthReports = () => {
     );
   }
 
-  // Authenticated UI: form to add/update records and a table listing records
+  // ========================
+  // UI
+  // ========================
   return (
     <div className="p-8">
       <header className="text-center py-1">
-        <h1 className="text-2xl font-bold text-customPurple hover:text-blue-600 transition-colors">
+        <h1 className="text-2xl font-bold text-customPurple">
           🩺 My Health Records
         </h1>
       </header>
 
-      {/* Form */}
+      {/* FORM */}
       <form onSubmit={handleSubmit} className="space-y-4 mb-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
-            type="text"
             name="doctorName"
             value={newRecord.doctorName}
             onChange={handleChange}
             placeholder="👨‍⚕️ Doctor Name"
             required
-            className="border border-gray-300 rounded-md px-4 py-2"
+            className="border rounded-md px-4 py-2"
           />
           <input
-            type="text"
             name="hospitalName"
             value={newRecord.hospitalName}
             onChange={handleChange}
-            placeholder="🏥 Hospital / Clinic Name"
+            placeholder="🏥 Hospital Name"
             required
-            className="border border-gray-300 rounded-md px-4 py-2"
+            className="border rounded-md px-4 py-2"
           />
           <input
             type="date"
@@ -129,103 +203,88 @@ const MyHealthReports = () => {
             value={newRecord.date}
             onChange={handleChange}
             required
-            className="border border-gray-300 rounded-md px-4 py-2"
+            className="border rounded-md px-4 py-2"
           />
           <input
-            type="text"
             name="diagnosis"
             value={newRecord.diagnosis}
             onChange={handleChange}
             placeholder="📝 Diagnosis"
-            className="border border-gray-300 rounded-md px-4 py-2"
+            className="border rounded-md px-4 py-2"
           />
           <input
-            type="text"
             name="doctorSuggestion"
             value={newRecord.doctorSuggestion}
             onChange={handleChange}
-            placeholder="💬 Doctor's Suggestions"
-            className="border border-gray-300 rounded-md px-4 py-2"
+            placeholder="💬 Doctor Suggestions"
+            className="border rounded-md px-4 py-2"
           />
           <input
-            type="text"
             name="prescribedMedicines"
             value={newRecord.prescribedMedicines}
             onChange={handleChange}
-            placeholder="💊 Prescribed Medicines"
-            className="border border-gray-300 rounded-md px-4 py-2"
+            placeholder="💊 Medicines"
+            className="border rounded-md px-4 py-2"
           />
           <textarea
             name="specialNotes"
             value={newRecord.specialNotes}
             onChange={handleChange}
-            placeholder="🗒️ Special Notes (optional)"
-            className="border border-gray-300 rounded-md px-4 py-2 md:col-span-2"
+            placeholder="🗒️ Special Notes"
+            className="border rounded-md px-4 py-2 md:col-span-2"
           />
         </div>
-        <button
-          type="submit"
-          className="bg-purple-600 text-white px-8 py-3 rounded-full hover:bg-purple-700 transition mt-4"
-        >
-          {editId !== null ? "✏️ Update Record" : "+ Add Report"}
+
+        <button className="bg-purple-600 text-white px-8 py-3 rounded-full">
+          {editId ? "✏️ Update Record" : "+ Add Report"}
         </button>
       </form>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full table-auto border-collapse">
-          <thead>
-            <tr className="bg-purple-600 text-white text-sm">
-              <th className="p-3 border">👨‍⚕️ Doctor</th>
-              <th className="p-3 border">🏥 Hospital</th>
-              <th className="p-3 border">📅 Date</th>
-              <th className="p-3 border">📝 Diagnosis</th>
-              <th className="p-3 border">💬 Suggestions</th>
-              <th className="p-3 border">💊 Medicines</th>
-
-              <th className="p-3 border">🗒️ Notes</th>
-              <th className="p-3 border">⚙️ Actions</th>
+      {/* TABLE */}
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="bg-purple-600 text-white">
+            <th className="p-2 border">Doctor</th>
+            <th className="p-2 border">Hospital</th>
+            <th className="p-2 border">Date</th>
+            <th className="p-2 border">Diagnosis</th>
+            <th className="p-2 border">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {records.map((r) => (
+            <tr key={r.id} className="odd:bg-purple-50">
+              <td className="p-2 border">{r.doctor_name}</td>
+              <td className="p-2 border">{r.hospital_name}</td>
+              <td className="p-2 border">
+                {new Date(r.visit_date).toLocaleDateString("en-IN")}
+              </td>
+              <td className="p-2 border">{r.diagnosis}</td>
+              <td className="p-2 border flex gap-2 justify-center">
+                <button
+                  onClick={() => handleEdit(r)}
+                  className="bg-green-500 text-white px-3 py-1 rounded"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(r.id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded"
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {records.map((record) => (
-              <tr
-                key={record.id}
-                className="odd:bg-purple-50 even:bg-white text-sm"
-              >
-                <td className="p-3 border">{record.doctorName}</td>
-                <td className="p-3 border">{record.hospitalName}</td>
-                <td className="p-3 border">{record.date}</td>
-                <td className="p-3 border">{record.diagnosis}</td>
-                <td className="p-3 border">{record.doctorSuggestion}</td>
-                <td className="p-3 border">{record.prescribedMedicines}</td>
-                <td className="p-3 border">{record.specialNotes}</td>
-                <td className="p-3 border flex gap-2 justify-center">
-                  <button
-                    onClick={() => handleEdit(record)}
-                    className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                  >
-                    ✏️ Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(record.id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                  >
-                    🗑️ Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {records.length === 0 && (
-              <tr>
-                <td colSpan="10" className="text-center p-6 text-gray-500">
-                  No records yet. Please add your first health report!
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          ))}
+          {records.length === 0 && (
+            <tr>
+              <td colSpan="5" className="text-center p-6 text-gray-500">
+                No records yet.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 };

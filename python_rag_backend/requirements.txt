@@ -23,6 +23,17 @@ sentence-transformers==4.1.0    # Hugging Face embeddings for document indexing
 # -----------------
 pypdf==5.6.1                    # PDF document parsing and text extraction
 
+# Database Connectivity
+# psycopg2-binary==2.9.6        # PostgreSQL database adapter for Python
+# this is done via conda due to some issue conda install -c conda-forge psycopg2
+
+# Authentication
+python-jose ==3.3.0              # JWT handling for Auth0 integration
+requests ==2.31.0                 # HTTP requests for Auth0 token validation
+
+pyreadline3==3.4.1                # Readline support for Windows
+
+
 # Development Tools
 # ---------------
 -e .                            # Install package in editable mode for development
