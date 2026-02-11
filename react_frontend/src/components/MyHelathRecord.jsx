@@ -256,7 +256,9 @@ const MyHealthReports = () => {
             <tr key={r.id} className="odd:bg-purple-50">
               <td className="p-2 border">{r.doctor_name}</td>
               <td className="p-2 border">{r.hospital_name}</td>
-              <td className="p-2 border">{r.visit_date}</td>
+              <td className="p-2 border">
+                {new Date(r.visit_date).toLocaleDateString("en-IN")}
+              </td>
               <td className="p-2 border">{r.diagnosis}</td>
               <td className="p-2 border flex gap-2 justify-center">
                 <button
